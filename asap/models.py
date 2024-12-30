@@ -1,10 +1,40 @@
 from django.contrib.auth.models import User  # Use the default User model
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import models
+import uuid
+
+class Giftcard(models.Model):
+    TYPE_CHOICES = [
+        ('Amazon', 'Amazon'),
+        ('Steam', 'Steam'),
+        ('Google Play', 'Google Play'),
+        ('iTunes', 'iTunes'),
+        ('Xbox', 'Xbox'),
+        ('PlayStation', 'PlayStation'),
+        ('Netflix', 'Netflix'),
+    ]
+
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, verbose_name="Cart Type")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='giftcards')  # Linking to User model
+    code = models.CharField(max_length=100, unique=True, verbose_name="Cart Code")
+    expiration_date = models.DateField(null=True, blank=True, verbose_name="Expiration Date")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Price")
+    status = models.CharField(
+        max_length=20,
+        choices=[('active', 'Active'), ('redeemed', 'Redeemed')],
+        default='active',
+        verbose_name="Status",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At") 
+
+    def __str__(self):
+        return f"{self.type} - {self.code}"
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)  # Link to default User model
+    id = models.IntegerField(primary_key=True, default=0)  
+    user = models.OneToOneField(User, on_delete=models.CASCADE) 
+    verified = models.BooleanField(default=False)
     username = models.CharField(max_length=150, unique=True)  # Username field under Profile
     email = models.EmailField(unique=True, blank=True, null=True)  # Email field under Profile
     pin = models.CharField(max_length=4, null=True, blank=True)  # Hashed PIN field
@@ -25,11 +55,11 @@ class Profile(models.Model):
         return check_password(raw_pin, self.pin)
 
     def __str__(self):
-        return self.username
+        return str(self.id)
 
 
 class Bank(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)  # Link to default User model
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to default User model
     bank_name = models.CharField(max_length=50, null=True, blank=True)
     account_name = models.CharField(max_length=50, blank=True, null=True)
     bvn = models.CharField(max_length=15, null=True, blank=True)
@@ -40,3 +70,21 @@ class Bank(models.Model):
 
     def __str__(self):
         return str(self.user)
+    
+
+class Notification(models.Model): 
+    content = models.TextField(max_length=100, unique=True, verbose_name="Content")
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created']
+
+class Crypto(models.Model): 
+    name = models.TextField(max_length=100, unique=True, verbose_name="Content")
+    price = models.PositiveIntegerField(default=1610)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created']
+ 
+

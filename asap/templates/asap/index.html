@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coins List</title>
+</head>
+<body>
+    <h1>Top 15 Cryptocurrencies</h1>
+    <ul>
+        {% for coin in coins %}
+            <li>
+                <h2>{{ coin.name }} ({{ coin.symbol }})</h2>
+                <p>Price: ${{ coin.quote.USD.price }}</p>
+                <p>Market Cap: ${{ coin.quote.USD.market_cap }}</p>
+                <p>24h Change: {{ coin.quote.USD.percent_change_24h }}%</p>
+                <p>Volume 24h: ${{ coin.quote.USD.volume_24h }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
