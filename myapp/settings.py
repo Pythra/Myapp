@@ -23,8 +23,8 @@ SECRET_KEY = 'django-insecure-58k)g(oj3c!ry(!v_g5z8tow&4ozd)&s4&*wck^c+c+5@d60wf
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+ALLOWED_HOSTS = ['www.Apprite.pythonanywhere.com', 'Apprite.pythonanywhere.com', 'localhost']
 
-ALLOWED_HOSTS = ['*']
 
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = True  # Allows requests from any origin during development
@@ -114,7 +114,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 STATIC_URL = 'static/'
-
+ 
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],  # No authentication classes
