@@ -23,7 +23,7 @@ SECRET_KEY = 'django-insecure-58k)g(oj3c!ry(!v_g5z8tow&4ozd)&s4&*wck^c+c+5@d60wf
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['www.Apprite.pythonanywhere.com', 'Apprite.pythonanywhere.com', 'localhost']
+ALLOWED_HOSTS = ['www.apprite.pythonanywhere.com', 'apprite.pythonanywhere.com', 'localhost']
 
 
 # CORS Configuration
@@ -129,7 +129,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'peze336@gmail.com'  # Replace with your Gmail
 EMAIL_HOST_PASSWORD = 'creyczjflhbsaqrv'  # Replace with your app password
