@@ -23,7 +23,7 @@ import re
 
 POSTMARK_API_URL = "https://api.postmarkapp.com/email"
 POSTMARK_API_TOKEN = "c63c358d-8bc7-4c50-a152-e7ead3290119"
-POSTMARK_FROM_EMAIL = "prince.eze@packnpay.com.ng"
+POSTMARK_FROM_EMAIL = "support@useasappay.com"
 
 def generate_verification_code():
     return ''.join(random.choices(string.digits, k=6))
