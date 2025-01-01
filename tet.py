@@ -6,7 +6,7 @@ API_TOKEN = "c63c358d-8bc7-4c50-a152-e7ead3290119"
 
 # Email data
 payload = {
-    "From": "support@useasappay.com",
+    "From": "prince.eze@packnpay.com.ng",
     "To": "pEZE336@GMAIL.COM",
     "Subject": "Hello from Postmark",
     "HtmlBody": "<strong>Hello</strong> there your activation code is 900.",
