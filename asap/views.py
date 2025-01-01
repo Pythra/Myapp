@@ -18,133 +18,143 @@ from django.views.decorators.csrf import csrf_exempt
 import random
 import string
 from django.core.cache import cache
-from django.conf import settings
+import re
 
+
+POSTMARK_API_URL = "https://api.postmarkapp.com/email"
+POSTMARK_API_TOKEN = "c63c358d-8bc7-4c50-a152-e7ead3290119"
+POSTMARK_FROM_EMAIL = "prince.eze@packnpay.com.ng"
 
 def generate_verification_code():
     return ''.join(random.choices(string.digits, k=6))
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
-
-
 def initiate_email_verification(request):
-    """Send verification code to email before signup"""
+    """Send verification code to email before signup using Postmark."""
+    email = request.data.get('email')
+
+    if not email:
+        return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Generate verification code
+    verification_code = generate_verification_code()
+    
+    # Store the code in cache with 10-minute expiry
+    cache_key = f"email_verification_{email}"
+    cache.set(cache_key, verification_code, timeout=600)
+
+    # Email payload for Postmark
+    payload = {
+        "From": POSTMARK_FROM_EMAIL,
+        "To": email,
+        "Subject": "Your Email Verification Code",
+        "HtmlBody": f"<p>Your verification code is: <strong>{verification_code}</strong></p>",
+        "MessageStream": "outbound"
+    }
+
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "X-Postmark-Server-Token": POSTMARK_API_TOKEN
+    }
+
     try:
-        email = request.data.get('email')
-        
-        if not email:
-            return Response({
-                "error": "Email is required"
-            }, status=status.HTTP_400_BAD_REQUEST)
-            
-        # Generate verification code
-        verification_code = generate_verification_code()
-        
-        # Store the code in cache with 10 minute expiry
-        cache_key = f"email_verification_{email}"
-        cache.set(cache_key, verification_code, timeout=600)
-        
-        # Debug: Print email and verification code
-        print(f"Sending email verification to: {email}")
-        print(f"Verification code: {verification_code}")
-        
-        # Use settings for email configuration
-        send_mail(
-            subject='Your Email Verification Code',
-            message=f'Your verification code is: {verification_code}',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
-            fail_silently=False,
-        )
-        return Response({
-            "message": "Verification code sent successfully"
-        }, status=status.HTTP_200_OK)
+        # Send the POST request to Postmark
+        response = requests.post(POSTMARK_API_URL, json=payload, headers=headers)
+
+        if response.status_code == 200:
+            return Response({"message": "Verification code sent successfully"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": f"Failed to send email: {response.text}"}, status=response.status_code)
     except Exception as e:
-        # Log the actual error for debugging
-        print(f"Email verification error: {str(e)}")
-        return Response({
-            "error": "Failed to send verification code. Please try again later."
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
+        return Response({"error": f"Failed to send email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_email_code(request):
-    """Verify the code sent to email"""
+    """Verify the code sent to email."""
     email = request.data.get('email')
     code = request.data.get('code')
-    
+
     if not email or not code:
-        return Response({
-            "error": "Email and verification code are required"
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response({"error": "Email and verification code are required"}, status=status.HTTP_400_BAD_REQUEST)
+
     cache_key = f"email_verification_{email}"
     stored_code = cache.get(cache_key)
-    
+
     if not stored_code:
-        return Response({
-            "error": "Verification code has expired"
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response({"error": "Verification code has expired"}, status=status.HTTP_400_BAD_REQUEST)
+
     if code != stored_code:
-        return Response({
-            "error": "Invalid verification code"
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response({"error": "Invalid verification code"}, status=status.HTTP_400_BAD_REQUEST)
+
     # Clear the code from cache
     cache.delete(cache_key)
-    
-    return Response({
-        "message": "Email verified successfully"
-    }, status=status.HTTP_200_OK)
+
+    return Response({"message": "Email verified successfully"}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def resend_verification_code(request):
-    """Resend verification code to email"""
+    """Resend verification code to email using Postmark."""
     email = request.data.get('email')
-    
+
     if not email:
-        return Response({
-            "error": "Email is required"
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
     
+    # Generate a new verification code
     verification_code = generate_verification_code()
     cache_key = f"email_verification_{email}"
     cache.set(cache_key, verification_code, timeout=600)
-    
+
+    # Email payload for Postmark
+    payload = {
+        "From": POSTMARK_FROM_EMAIL,
+        "To": email,
+        "Subject": "Your New Email Verification Code",
+        "HtmlBody": f"<p>Your new verification code is: <strong>{verification_code}</strong></p>",
+        "MessageStream": "outbound"
+    }
+
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "X-Postmark-Server-Token": POSTMARK_API_TOKEN
+    }
+
     try:
-        send_mail(
-            'Your New Email Verification Code',
-            f'Your new verification code is: {verification_code}',
-            'noreply@Asappay.com',
-            [email],
-            fail_silently=False,
-        )
-        return Response({
-            "message": "New verification code sent successfully"
-        }, status=status.HTTP_200_OK)
+        # Send the POST request to Postmark
+        response = requests.post(POSTMARK_API_URL, json=payload, headers=headers)
+
+        if response.status_code == 200:
+            return Response({"message": "New verification code sent successfully"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": f"Failed to send email: {response.text}"}, status=response.status_code)
     except Exception as e:
-        return Response({
-            "error": f"Failed to send verification code: {str(e)}"
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"error": f"Failed to send email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
 
 class SignupView(APIView):
     def post(self, request):
-        username = request.data.get('username')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
         password = request.data.get('password')
         email = request.data.get('email')
+        phone = request.data.get('phone')
 
-        if not username or not password or not email:
+        if not first_name or not last_name or not password or not email or not phone:
             return Response(
-                {"error": "Username, email, and password are required."},
+                {"error": "First name, last name, email, phone, and password are required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Generate username
+        username = f"{first_name.lower()}_{last_name.lower()}"
+
         if User.objects.filter(username=username).exists():
             return Response(
-                {"error": "Username already exists."},
+                {"error": "A user with this first and last name already exists."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -154,8 +164,23 @@ class SignupView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user = User.objects.create_user(username=username, email=email, password=password)
-        profile = Profile(id=user.id, user=user, username=username, email=email)
+        if Profile.objects.filter(phone=phone).exists():
+            return Response(
+                {"error": "Phone number already exists."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Password validation
+        if len(password) < 8 or not re.search(r'[A-Z]', password) or not re.search(r'[a-z]', password) or \
+           not re.search(r'\d', password) or not re.search(r'[@$!%*?&#]', password):
+            return Response(
+                {"error": "Password must be at least 8 characters long, contain an uppercase letter, "
+                          "a lowercase letter, a number, and a special character."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.create_user(username=username, email=email, password=password, first_name=first_name, last_name=last_name)
+        profile = Profile(id=user.id, user=user, username=username, first_name=first_name, last_name=last_name, email=email, phone=phone)
         profile.set_pin(request.data.get('pin'))  # Set the PIN if provided
         profile.save()
 
