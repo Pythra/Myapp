@@ -6,7 +6,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['id', 'user','email', 'phone', 'first_name', 'last_name', 'pin', 'verified', 'joined']
         extra_kwargs = {
-            'user': {'read_only': True},  # User cannot be changed via PUT/PATCH
+            'user': {'read_only': True},   
             'joined': {'read_only': True},
         }
 
@@ -14,7 +14,10 @@ class BankSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bank
         fields = ['id', 'user', 'bank_name', 'account_name', 'bvn', 'joined']
-
+        extra_kwargs = {
+            'user': {'read_only': True},   
+            'joined': {'read_only': True},
+        }
 
 
 class GiftcardSerializer(serializers.ModelSerializer):

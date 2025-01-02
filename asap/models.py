@@ -35,6 +35,7 @@ class Profile(models.Model):
     id = models.IntegerField(primary_key=True, default=0)  
     user = models.OneToOneField(User, on_delete=models.CASCADE) 
     verified = models.BooleanField(default=False)
+    allow_notifications = models.BooleanField(default=False)
     username = models.CharField(max_length=150, unique=True)  # Username field under Profile
     email = models.EmailField(unique=True, blank=True, null=True)  # Email field under Profile
     pin = models.CharField(max_length=4, null=True, blank=True)  # Hashed PIN field
@@ -59,10 +60,12 @@ class Profile(models.Model):
 
 
 class Bank(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to default User model
+    id = models.IntegerField(primary_key=True, default=0)  
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  
     bank_name = models.CharField(max_length=50, null=True, blank=True)
     account_name = models.CharField(max_length=50, blank=True, null=True)
     bvn = models.CharField(max_length=15, null=True, blank=True)
+    active = models.BooleanField(default=False)
     joined = models.DateTimeField(auto_now_add=True)
 
     class Meta:
