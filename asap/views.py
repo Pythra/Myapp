@@ -231,12 +231,11 @@ class ProfileDetailView(RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes =[AllowAny] 
-
+    
 class BankListView(generics.ListAPIView):
     queryset = Bank.objects.all()
     serializer_class = BankSerializer
-    permission_classes = [IsAuthenticated]
-
+    authentication_classes = [TokenAuthentication] 
 
 class BankCreateView(generics.CreateAPIView):
     serializer_class = BankSerializer
