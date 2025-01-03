@@ -117,9 +117,11 @@ STATIC_URL = 'static/'
  
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [],  # No authentication classes
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # Allow access without authentication
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 
