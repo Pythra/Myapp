@@ -135,6 +135,7 @@ def resend_verification_code(request):
         return Response({"error": f"Failed to send email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
 
+@permission_classes([AllowAny])
 class SignupView(APIView):
     def post(self, request):
         first_name = request.data.get('first_name')
@@ -237,7 +238,7 @@ class BankListView(generics.ListAPIView):
     serializer_class = BankSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
-    
+
 class BankCreateView(generics.CreateAPIView):
     serializer_class = BankSerializer
     permission_classes = [AllowAny]
