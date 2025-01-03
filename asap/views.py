@@ -231,14 +231,15 @@ class ProfileDetailView(RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes =[AllowAny] 
-    
-class BankListView(generics.ListAPIView): 
+
+class BankListView(generics.ListAPIView):
     serializer_class = BankSerializer
-    authentication_classes = [TokenAuthentication] 
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view
 
     def get_queryset(self):
-        return Bank.objects.filter(user=self.request.user)
-
+        user = self.request.user.id
+    
 class BankCreateView(generics.CreateAPIView):
     serializer_class = BankSerializer
     permission_classes = [AllowAny]
