@@ -287,7 +287,22 @@ def fetch_user(request):
     except Token.DoesNotExist:
         return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
  
- 
+
+@api_view(['DELETE'])
+def delete_user(request):
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header or not auth_header.startswith('Token '):
+        return Response({'error': 'Authorization header is improperly formatted'}, status=status.HTTP_400_BAD_REQUEST)
+
+    token = auth_header.split(' ')[1]
+    try:
+        token_obj = Token.objects.get(key=token)
+        user = token_obj.user
+        user.delete()  # Deletes the user
+        return Response({'message': 'User deleted successfully'}, status=status.HTTP_200_OK)
+    except Token.DoesNotExist:
+        return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 
 @api_view(['GET'])
