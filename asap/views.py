@@ -15,7 +15,6 @@ from django.http import JsonResponse
 from rest_framework.response import Response 
 from django.core.mail import send_mail 
 from django.views.decorators.csrf import csrf_exempt 
-from rest_framework.exceptions import NotAuthenticated
 import random
 import string
 from django.core.cache import cache
@@ -232,18 +231,11 @@ class ProfileDetailView(RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes =[AllowAny] 
-
-class BankListView(generics.ListAPIView):
-    serializer_class = BankSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view
-
-    def get_queryset(self):
-        user = self.request.user
-        if not user or user.is_anonymous:
-            raise NotAuthenticated("Authentication credentials were not provided or are invalid.")
-        return Bank.objects.filter(user=user)
     
+class BankListView(generics.ListAPIView): 
+    serializer_class = BankSerializer
+    authentication_classes = [TokenAuthentication] 
+
 class BankCreateView(generics.CreateAPIView):
     serializer_class = BankSerializer
     permission_classes = [AllowAny]
