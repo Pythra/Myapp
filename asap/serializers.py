@@ -13,7 +13,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 class BankSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bank
-        fields = ['user', 'active', 'bank_name', 'account_name', 'bvn', 'joined']
+        fields = ['user', 'active', 'bank_name', 'account_number', 'account_name', 'bvn', 'joined']
 
 
 

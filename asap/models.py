@@ -63,6 +63,7 @@ class Bank(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)  
     bank_name = models.CharField(max_length=50, null=True, blank=True)
     account_name = models.CharField(max_length=50, blank=True, null=True)
+    account_number = models.CharField(max_length=12, blank=True, null=True)
     bvn = models.CharField(max_length=15, null=True, blank=True)
     active = models.BooleanField(default=False)
     joined = models.DateTimeField(auto_now_add=True)
