@@ -18,8 +18,6 @@ from django.views.decorators.csrf import csrf_exempt
 import random
 import string
 from django.core.cache import cache
-import re
-
 
 POSTMARK_API_URL = "https://api.postmarkapp.com/email"
 POSTMARK_API_TOKEN = "c63c358d-8bc7-4c50-a152-e7ead3290119"
@@ -30,19 +28,13 @@ def generate_verification_code():
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def initiate_email_verification(request):
-    """Send verification code to email before signup using Postmark."""
+def initiate_email_verification(request): 
     email = request.data.get('email')
-
     if not email:
-        return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Generate verification code
-    verification_code = generate_verification_code()
-    
-    # Store the code in cache with 10-minute expiry
+        return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST) 
+    verification_code = generate_verification_code() 
     cache_key = f"email_verification_{email}"
-    cache.set(cache_key, verification_code, timeout=600)
+    cache.set(cache_key, verification_code, timeout=1000)
 
     # Email payload for Postmark
     payload = {
@@ -204,16 +196,15 @@ class SignupView(APIView):
             not password.isdigit()
         )
 
- 
 class LogoutView(APIView):
-    permission_classes = [AllowAny]  # Ensure the user is authenticated
-    
-    def post(self, request):
-        # Check if the user is authenticated before attempting to delete the token
-        if request.user and hasattr(request.user, 'auth_token'):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request): 
+        if request.user.auth_token:
             request.user.auth_token.delete()
             return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        return Response({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({"error": "Token not found"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProfileListCreateView(generics.ListCreateAPIView):
     queryset = Profile.objects.all()
@@ -287,7 +278,6 @@ def fetch_user(request):
     except Token.DoesNotExist:
         return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
  
-
 @api_view(['DELETE'])
 def delete_user(request):
     auth_header = request.headers.get('Authorization', '')
@@ -302,8 +292,6 @@ def delete_user(request):
         return Response({'message': 'User deleted successfully'}, status=status.HTTP_200_OK)
     except Token.DoesNotExist:
         return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
 
 @api_view(['GET'])
 def get_coins(request):

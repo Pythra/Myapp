@@ -15,7 +15,7 @@ class Giftcard(models.Model):
     ]
 
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, verbose_name="Cart Type")
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='giftcards')  # Linking to User model
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='giftcards')
     code = models.CharField(max_length=100, unique=True, verbose_name="Cart Code")
     expiration_date = models.DateField(null=True, blank=True, verbose_name="Expiration Date")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Price")
