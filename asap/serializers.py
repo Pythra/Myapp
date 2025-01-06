@@ -4,7 +4,7 @@ from .models import Profile, Bank, Giftcard, Notification
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['id', 'user','email', 'phone', 'first_name', 'last_name', 'pin', 'verified', 'joined']
+        fields = ['id', 'user','email', 'phone', 'first_name', 'last_name', 'pin', 'verified', 'allow_notifications','joined']
         extra_kwargs = {
             'user': {'read_only': True},  # User cannot be changed via PUT/PATCH
             'joined': {'read_only': True},
