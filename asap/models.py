@@ -76,6 +76,7 @@ class Bank(models.Model):
     
 
 class Notification(models.Model): 
+    title = models.TextField(max_length=20)
     content = models.TextField(max_length=100, unique=True, verbose_name="Content")
     created = models.DateTimeField(auto_now_add=True)
 
