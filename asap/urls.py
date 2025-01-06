@@ -1,6 +1,6 @@
 from rest_framework.authtoken.views import obtain_auth_token
 from django.urls import path
-from .views import get_coins, fetch_user, delete_user, verify_email_code, initiate_email_verification, resend_verification_code, NotificationView, ProfileListCreateView, SignupView, LogoutView, ProfileDetailView, GiftCardDetailView, GiftCardListCreateView, ProfileView, BankCreateView, BankListView, BankDetailView
+from .views import get_coins, fetch_user, delete_user, ChangePasswordView, verify_email_code, initiate_email_verification, resend_verification_code, NotificationView, ProfileListCreateView, SignupView, LogoutView, ProfileDetailView, GiftCardDetailView, GiftCardListCreateView, ProfileView, BankCreateView, BankListView, BankDetailView
  
  
 urlpatterns = [
@@ -16,6 +16,7 @@ urlpatterns = [
     path('bank/list/', BankListView.as_view(), name='bank-list'),
     path('bank/<int:pk>/', BankDetailView.as_view(), name='bank-detail'),
     path('coins/', get_coins, name='get_coins'),
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),,
     path('giftcards/', GiftCardListCreateView.as_view(), name='giftcard-list-create'),
     path('giftcards/<int:id>/', GiftCardDetailView.as_view(), name='giftcard-detail'),
     path('initiate-email-verification/', initiate_email_verification, name='initiate_email_verification'),

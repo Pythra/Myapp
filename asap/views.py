@@ -318,3 +318,45 @@ def get_coins(request):
             'error': str(e),
             'coins': []
         }, status=500)
+    
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Extract Authorization header
+        auth_header = request.headers.get('Authorization', '')
+        if not auth_header or not auth_header.startswith('Token '):
+            return Response({'error': 'Authorization header is improperly formatted'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Extract token and validate it
+        token = auth_header.split(' ')[1]
+        try:
+            token_obj = Token.objects.get(key=token)
+            user = token_obj.user
+        except Token.DoesNotExist:
+            return Response({'error': 'Invalid token provided'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        data = request.data
+
+        # Extract current and new passwords
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        confirm_password = data.get('confirm_password')
+
+        # Check if all fields are provided
+        if not current_password or not new_password or not confirm_password:
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verify the current password
+        if not user.check_password(current_password):
+            return Response({'error': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if new password matches confirmation
+        if new_password != confirm_password:
+            return Response({'error': 'Passwords do not match.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Update the password
+        user.set_password(new_password)
+        user.save()
+
+        return Response({'message': 'Password changed successfully.'}, status=status.HTTP_200_OK)
