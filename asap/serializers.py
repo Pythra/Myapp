@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Profile, Bank, Giftcard, Notification
+from .models import Profile, Bank, Giftcard, Notification, ExpoDevice
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,3 +28,10 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = '__all__'
 
+
+class ExpoDeviceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExpoDevice
+        fields = ['expo_token']
+ 
+     

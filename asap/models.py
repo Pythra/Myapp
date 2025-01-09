@@ -1,7 +1,16 @@
 from django.contrib.auth.models import User  # Use the default User model
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import models
-import uuid
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from exponent_server_sdk import (
+    DeviceNotRegisteredError,
+    PushClient,
+    PushMessage,
+    PushServerError,
+)
+from requests.exceptions import ConnectionError, HTTPError
 
 class Giftcard(models.Model):
     TYPE_CHOICES = [
@@ -74,21 +83,62 @@ class Bank(models.Model):
     def __str__(self):
         return str(self.user)
     
+class ExpoDevice(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Consistent with other models
+    expo_token = models.CharField(max_length=255)
+    active = models.BooleanField(default=True)
 
-class Notification(models.Model): 
-    title = models.TextField(max_length=120)
-    content = models.TextField(max_length=220, unique=True, verbose_name="Content")
+    def __str__(self):
+        return f"{self.user.username}'s device"
+
+class Notification(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ['created']
+    def __str__(self):
+        return self.title
 
-class Crypto(models.Model): 
-    name = models.TextField(max_length=100, unique=True, verbose_name="Content")
-    price = models.PositiveIntegerField(default=1610)
-    created = models.DateTimeField(auto_now_add=True)
+def send_push_message(token, title, message):
+    try:
+        response = PushClient().publish(
+            PushMessage(
+                to=token,
+                title=title,
+                body=message,
+                data={'type': 'notification'}  # You can add custom data here
+            )
+        )
+    except PushServerError as exc:
+        print(f"Push server error: {exc}")
+        # Handle server errors
+        return False
+    except (ConnectionError, HTTPError) as exc:
+        print(f"Connection error: {exc}")
+        # Handle connection errors
+        return False
+    except DeviceNotRegisteredError:
+        # Handle inactive devices
+        ExpoDevice.objects.filter(expo_token=token).update(active=False)
+        return False
+    
+    return True
 
-    class Meta:
-        ordering = ['created']
+@receiver(post_save, sender=Notification)
+def send_notification(sender, instance, created, **kwargs):
+    if created:  # Only send notification for newly created instances
+        # Get all active device tokens
+        active_devices = ExpoDevice.objects.filter(active=True)
+        
+        for device in active_devices:
+            send_push_message(
+                device.expo_token,
+                instance.title,
+                instance.content
+            )
+
+# Register the signal
+post_save.connect(send_notification, sender=Notification)
+
  
 
