@@ -127,6 +127,15 @@ def resend_verification_code(request):
         return Response({"error": f"Failed to send email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework import status
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+from myapp.models import Profile  # Replace `myapp` with your actual app name
+
+
 @permission_classes([AllowAny])
 class SignupView(APIView):
     def post(self, request):
@@ -134,9 +143,21 @@ class SignupView(APIView):
         password = request.data.get('password')
         email = request.data.get('email')
 
+        if not all([username, password, email]):
+            return Response(
+                {"error": "Username, password, and email are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if User.objects.filter(username=username).exists():
             return Response(
                 {"error": "A user with this username already exists."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {"error": "A user with this email already exists."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -147,18 +168,23 @@ class SignupView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user = User.objects.create_user(username=username, password=password, email=email)
+        # Create User and Profile
+        user = User.objects.create_user(username=username, email=email, password=password)
+        profile = Profile.objects.create(user=user, email=email)
 
+        # Generate authentication token
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response(
-            {"message": "User created successfully.", "token": token.key},
+            {"message": "User and profile created successfully.", "token": token.key},
             status=status.HTTP_201_CREATED,
         )
 
     @staticmethod
     def validate_password(password):
         return len(password) >= 8 and not password.isdigit()
+
+
 
 class LogoutView(APIView):
     permission_classes = [AllowAny]
