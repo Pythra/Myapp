@@ -7,8 +7,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView, CreateAPIView
 import requests
-from .models import Profile, Bank, Giftcard, Notification, ExpoDevice
-from .serializers import ProfileSerializer, BankSerializer, NotificationSerializer,  GiftcardSerializer, ExpoDeviceSerializer
+from .models import Profile, Bank, Giftcard, Notification
+from .serializers import ProfileSerializer, BankSerializer, NotificationSerializer,  GiftcardSerializer
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse 
@@ -354,17 +354,3 @@ class ChangePasswordView(APIView):
         user.save()
 
         return Response({'message': 'Password changed successfully.'}, status=status.HTTP_200_OK)
-
-
-class RegisterDeviceView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        serializer = ExpoDeviceSerializer(data=request.data)
-        if serializer.is_valid():
-            ExpoDevice.objects.update_or_create(
-                user=request.user,
-                defaults={'expo_token': serializer.validated_data['expo_token']}
-            )
-            return Response({'status': 'device registered'})
-        return Response(serializer.errors, status=400)
