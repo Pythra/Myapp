@@ -130,71 +130,35 @@ def resend_verification_code(request):
 @permission_classes([AllowAny])
 class SignupView(APIView):
     def post(self, request):
-        first_name = request.data.get('first_name')
-        last_name = request.data.get('last_name')
+        username = request.data.get('username')
         password = request.data.get('password')
         email = request.data.get('email')
-        phone = request.data.get('phone')
-
-        if not all([first_name, last_name, password, email, phone]):
-            return Response(
-                {"error": "First name, last name, email, phone, and password are required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Generate username
-        username = f"{first_name.lower()}_{last_name.lower()}"
 
         if User.objects.filter(username=username).exists():
             return Response(
-                {"error": "A user with this first and last name already exists."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if User.objects.filter(email=email).exists():
-            return Response(
-                {"error": "Email already exists."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if Profile.objects.filter(phone=phone).exists():
-            return Response(
-                {"error": "Phone number already exists."},
+                {"error": "A user with this username already exists."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Password validation
-        if not self.validate_password(password, first_name, last_name):
+        if not self.validate_password(password):
             return Response(
-                {"error": "Password must be at least 8 characters long, not similar to your name, and not entirely numeric."},
+                {"error": "Password must be at least 8 characters long and not entirely numeric."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user = User.objects.create_user(username=username, email=email, password=password)
-        profile = Profile(
-            id=user.id,
-            user=user,
-            username=username,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            phone=phone
-        )
-        profile.set_pin(request.data.get('pin'))  # Set the PIN if provided
-        profile.save()
+        user = User.objects.create_user(username=username, password=password, email=email)
 
         token, _ = Token.objects.get_or_create(user=user)
 
-        return Response({"message": "User created successfully.", "token": token.key}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "User created successfully.", "token": token.key},
+            status=status.HTTP_201_CREATED,
+        )
 
     @staticmethod
-    def validate_password(password, first_name, last_name):
-        return (
-            len(password) >= 8 and
-            first_name.lower() not in password.lower() and
-            last_name.lower() not in password.lower() and
-            not password.isdigit()
-        )
+    def validate_password(password):
+        return len(password) >= 8 and not password.isdigit()
 
 class LogoutView(APIView):
     permission_classes = [AllowAny]
