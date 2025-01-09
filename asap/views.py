@@ -125,17 +125,7 @@ def resend_verification_code(request):
             return Response({"error": f"Failed to send email: {response.text}"}, status=response.status_code)
     except Exception as e:
         return Response({"error": f"Failed to send email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from rest_framework import status
-from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
-from myapp.models import Profile  # Replace `myapp` with your actual app name
-
-
+  
 @permission_classes([AllowAny])
 class SignupView(APIView):
     def post(self, request):
