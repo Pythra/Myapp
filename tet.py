@@ -1,7 +1,11 @@
 import requests
 
-url = "https://apprite.pythonanywhere.com/api/bank/list/"
-headers = {"Authorization": "Token 758b3599a7d374379e2ebe6b4d26eaa65f"}
+url = "https://apprite.pythonanywhere.com/api/bank/27/"
+headers = {
+    "Authorization": "Token 9beb3d1fec704831d9d6076acd29b136758731ad",
+    "Content-Type": "application/json"
+}
+data = {"active": False}
 
-response = requests.get(url, headers=headers)
+response = requests.patch(url, json=data, headers=headers)
 print(response.status_code, response.json())
