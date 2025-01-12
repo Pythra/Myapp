@@ -4,16 +4,16 @@ from .models import Profile, Bank, Giftcard, Notification
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['id', 'user','email', 'phone', 'first_name', 'last_name', 'pin', 'verified', 'allow_notifications','joined']
+        fields = '__all__'
         extra_kwargs = {
-            'user': {'read_only': True},  # User cannot be changed via PUT/PATCH
-            'joined': {'read_only': True},
-        }
+        'user': {'read_only': True},   
+        'joined': {'read_only': True},
+    }
 
 class BankSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bank
-        fields = ['id', 'user', 'active', 'bank_name', 'account_number', 'account_name', 'bvn', 'joined']
+        fields = '__all__'
 
 
 

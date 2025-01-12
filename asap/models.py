@@ -30,7 +30,6 @@ class Giftcard(models.Model):
     def __str__(self):
         return f"{self.type} - {self.code}"
 
-
 class Profile(models.Model):
     id = models.IntegerField(primary_key=True, default=0)  
     user = models.OneToOneField(User, on_delete=models.CASCADE) 
@@ -42,6 +41,8 @@ class Profile(models.Model):
     phone = models.CharField(max_length=15, null=True, blank=True)
     first_name = models.CharField(max_length=30, blank=True, null=True)
     last_name = models.CharField(max_length=30, blank=True, null=True)
+    date_of_birth = models.DateField(null=True, blank=True)  # New field
+    referral_code = models.CharField(max_length=7, unique=True, null=True, blank=True)  # Referral code field
     joined = models.DateTimeField(auto_now_add=True)
 
     class Meta:

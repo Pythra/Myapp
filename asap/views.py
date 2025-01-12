@@ -200,7 +200,8 @@ class ProfileListCreateView(generics.ListCreateAPIView):
 class ProfileView(RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes =[AllowAny] 
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
 
     
