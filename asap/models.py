@@ -31,11 +31,16 @@ class Giftcard(models.Model):
         return f"{self.type} - {self.code}"
 
 class Profile(models.Model):
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+    ]
     id = models.IntegerField(primary_key=True, default=0)  
     user = models.OneToOneField(User, on_delete=models.CASCADE) 
     verified = models.BooleanField(default=False)
     allow_notifications = models.BooleanField(default=False)
     username = models.CharField(max_length=150, unique=True)  # Username field under Profile
+    gender = models.CharField(max_length=150, choices=GENDER_CHOICES, blank=True,)  # Username field under Profile
     email = models.EmailField(unique=True, blank=True, null=True)  # Email field under Profile
     pin = models.CharField(max_length=4, null=True, blank=True)  # Hashed PIN field
     phone = models.CharField(max_length=15, null=True, blank=True)
