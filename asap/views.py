@@ -33,10 +33,6 @@ def initiate_email_verification(request):
     if not email:
         return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Check if the email already exists
-    if User.objects.filter(email=email).exists():
-        return Response({"error": "Email already exists."}, status=status.HTTP_400_BAD_REQUEST)
-
     # Generate a verification code
     verification_code = generate_verification_code()
     cache_key = f"email_verification_{email}"
