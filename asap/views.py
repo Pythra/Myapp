@@ -173,9 +173,7 @@ class SignupView(APIView):
             email=email, 
             referral_code=referral_code,
         )
-
-        # Set the PIN if provided
-        profile.set_pin(request.data.get('pin'))  
+        
         profile.save()
 
         # Generate an authentication token
@@ -232,10 +230,7 @@ class ProfileListCreateView(generics.ListCreateAPIView):
 class ProfileView(RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
-
-
+    permission_classes =[AllowAny] 
     
 class ProfileDetailView(RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
