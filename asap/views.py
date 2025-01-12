@@ -134,9 +134,9 @@ class SignupView(APIView):
         password = request.data.get('password')
         email = request.data.get('email')  
 
-        if not all([username, password, email, date_of_birth]):
+        if not all([username, password, email]):
             return Response(
-                {"error": "Username, password, email, and date of birth are required."},
+                {"error": "Username, password, email are required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
