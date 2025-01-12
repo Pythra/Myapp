@@ -132,8 +132,7 @@ class SignupView(APIView):
     def post(self, request):
         username = request.data.get('username') 
         password = request.data.get('password')
-        email = request.data.get('email') 
-        date_of_birth = request.data.get('date_of_birth')  # New field
+        email = request.data.get('email')  
 
         if not all([username, password, email, date_of_birth]):
             return Response(
@@ -160,16 +159,7 @@ class SignupView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Validate date_of_birth format
-        try:
-            from datetime import datetime
-            date_of_birth = datetime.strptime(date_of_birth, '%Y-%m-%d').date()
-        except ValueError:
-            return Response(
-                {"error": "Date of birth must be in the format YYYY-MM-DD."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
+      
         # Create the user
         user = User.objects.create_user(username=username, email=email, password=password)
 
