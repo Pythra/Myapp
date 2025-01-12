@@ -28,11 +28,17 @@ def generate_verification_code():
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def initiate_email_verification(request): 
+def initiate_email_verification(request):
     email = request.data.get('email')
     if not email:
-        return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST) 
-    verification_code = generate_verification_code() 
+        return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check if the email already exists
+    if User.objects.filter(email=email).exists():
+        return Response({"error": "Email already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Generate a verification code
+    verification_code = generate_verification_code()
     cache_key = f"email_verification_{email}"
     cache.set(cache_key, verification_code, timeout=1000)
 
@@ -146,17 +152,11 @@ class SignupView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if User.objects.filter(email=email).exists():
-            return Response(
-                {"error": "Email already exists."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         # Password validation
         if not self.validate_password(password, username):
             return Response(
                 {"error": "Password must be at least 8 characters long, not similar to your username, and not entirely numeric."},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST, 
             )
 
       
@@ -175,9 +175,7 @@ class SignupView(APIView):
         )
 
         # Set the PIN if provided
-        if 'pin' in request.data:
-            profile.set_pin(request.data['pin'])
-        
+        profile.set_pin(request.data.get('pin'))  
         profile.save()
 
         # Generate an authentication token
