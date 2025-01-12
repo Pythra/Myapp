@@ -18,7 +18,7 @@ def update_pin(profile_id, token, new_pin):
         print(f"Failed to update PIN. Status Code: {response.status_code}, Response: {response.json()}")
 
 # Example usage
-profile_id = 26  # Replace with the actual profile ID
+profile_id = 32  # Replace with the actual profile ID
 token = "758b3599a7d374379e2ebe6b4d220bb106eaa65f"  # Replace with the actual token
 new_pin = "1234"  # Replace with the new PIN
 

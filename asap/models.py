@@ -38,8 +38,7 @@ class Profile(models.Model):
     id = models.IntegerField(primary_key=True, default=0)  
     user = models.OneToOneField(User, on_delete=models.CASCADE) 
     verified = models.BooleanField(default=False)
-    allow_notifications = models.BooleanField(default=False)
-    username = models.CharField(max_length=150, unique=True)  # Username field under Profile
+    allow_notifications = models.BooleanField(default=False) 
     gender = models.CharField(max_length=150, choices=GENDER_CHOICES, blank=True,)  # Username field under Profile
     email = models.EmailField(unique=True, blank=True, null=True)  # Email field under Profile
     pin = models.CharField(max_length=4, null=True, blank=True)  # Hashed PIN field
