@@ -133,17 +133,17 @@ class SignupView(APIView):
         username = request.data.get('username') 
         password = request.data.get('password')
         email = request.data.get('email') 
+        date_of_birth = request.data.get('date_of_birth')  # New field
 
-        if not all([username, password, email]):
+        if not all([username, password, email, date_of_birth]):
             return Response(
-                {"error": "First name, last name, email, phone, and password are required."},
+                {"error": "Username, password, email, and date of birth are required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
- 
 
         if User.objects.filter(username=username).exists():
             return Response(
-                {"error": "A user with this first and last name already exists."},
+                {"error": "A user with this username already exists."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -156,22 +156,66 @@ class SignupView(APIView):
         # Password validation
         if not self.validate_password(password, username):
             return Response(
-                {"error": "Password must be at least 8 characters long, not similar to your name, and not entirely numeric."},
+                {"error": "Password must be at least 8 characters long, not similar to your username, and not entirely numeric."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Validate date_of_birth format
+        try:
+            from datetime import datetime
+            date_of_birth = datetime.strptime(date_of_birth, '%Y-%m-%d').date()
+        except ValueError:
+            return Response(
+                {"error": "Date of birth must be in the format YYYY-MM-DD."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create the user
         user = User.objects.create_user(username=username, email=email, password=password)
+
+        # Generate a unique 7-character referral code
+        referral_code = self.generate_referral_code()
+
+        # Create the profile
         profile = Profile(
             id=user.id,
             user=user, 
-            email=email,
+            email=email, 
+            referral_code=referral_code,
         )
-        profile.set_pin(request.data.get('pin'))  # Set the PIN if provided
+
+        # Set the PIN if provided
+        if 'pin' in request.data:
+            profile.set_pin(request.data['pin'])
+        
         profile.save()
 
+        # Generate an authentication token
         token, _ = Token.objects.get_or_create(user=user)
 
-        return Response({"message": "User created successfully.", "token": token.key}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "User created successfully.", "token": token.key, "referral_code": referral_code},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @staticmethod
+    def validate_password(password, username):
+        """Validates password requirements."""
+        return (
+            len(password) >= 8 and
+            username.lower() not in password.lower() and 
+            not password.isdigit()
+        )
+
+    @staticmethod
+    def generate_referral_code():
+        """Generates a unique 7-character referral code."""
+        import random
+        import string
+        while True:
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
+            if not Profile.objects.filter(referral_code=code).exists():
+                return code
 
     @staticmethod
     def validate_password(password, username):
