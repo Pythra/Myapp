@@ -33,13 +33,6 @@ def initiate_email_verification(request):
     if not email:
         return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Check if the email already exists
-    email_exists = User.objects.filter(email=email).exists()
-
-    # If the email exists, return email_exists flag
-    if email_exists:
-        return Response({"email_exists": True, "message": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
-    
     # Generate a verification code
     verification_code = generate_verification_code()
     cache_key = f"email_verification_{email}"
@@ -65,7 +58,7 @@ def initiate_email_verification(request):
         response = requests.post(POSTMARK_API_URL, json=payload, headers=headers)
 
         if response.status_code == 200:
-            return Response({"email_exists": False, "message": "Verification code sent successfully"}, status=status.HTTP_200_OK)
+            return Response({"message": "Verification code sent successfully"}, status=status.HTTP_200_OK)
         else:
             return Response({"error": f"Failed to send email: {response.text}"}, status=response.status_code)
     except Exception as e:
