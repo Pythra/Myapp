@@ -65,7 +65,7 @@ class Profile(models.Model):
 
 
 class Bank(models.Model): 
-    id = models.IntegerField(primary_key=True, default=0)  
+    id = models.IntegerField(primary_key=True)  
     user = models.ForeignKey(User, on_delete=models.CASCADE)  
     bank_name = models.CharField(max_length=50, null=True, blank=True)
     account_name = models.CharField(max_length=50, blank=True, null=True)
