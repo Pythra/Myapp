@@ -88,6 +88,8 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['created']
+    def __str__(self):
+        return str(self.user)
 
 class Crypto(models.Model): 
     name = models.TextField(max_length=100, unique=True, verbose_name="Content")
