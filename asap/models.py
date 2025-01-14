@@ -61,7 +61,7 @@ class Profile(models.Model):
         return check_password(raw_pin, self.pin)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.user)
 
 
 class Bank(models.Model): 
@@ -78,7 +78,7 @@ class Bank(models.Model):
         ordering = ['joined']
 
     def __str__(self):
-        return str(self.user)
+        return str(self.user + ' ' + self.bank_name)
     
 
 class Notification(models.Model): 
@@ -89,7 +89,7 @@ class Notification(models.Model):
     class Meta:
         ordering = ['created']
     def __str__(self):
-        return str(self.user)
+        return str(self.title)
 
 class Crypto(models.Model): 
     name = models.TextField(max_length=100, unique=True, verbose_name="Content")
