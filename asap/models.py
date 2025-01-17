@@ -78,7 +78,7 @@ class Bank(models.Model):
         ordering = ['joined']
 
     def __str__(self):
-        return str(self.user + ' ' + self.bank_name)
+        return str(self.user)
     
 
 class Notification(models.Model): 
