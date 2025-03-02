@@ -1,34 +1,73 @@
 from django.contrib.auth.models import User  # Use the default User model
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import models
-import uuid
+from decimal import Decimal 
 
-class Giftcard(models.Model):
-    TYPE_CHOICES = [
-        ('Amazon', 'Amazon'),
-        ('Steam', 'Steam'),
-        ('Google Play', 'Google Play'),
-        ('iTunes', 'iTunes'),
-        ('Xbox', 'Xbox'),
-        ('PlayStation', 'PlayStation'),
-        ('Netflix', 'Netflix'),
-    ]
 
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES, verbose_name="Cart Type")
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='giftcards')
-    code = models.CharField(max_length=100, unique=True, verbose_name="Cart Code")
-    expiration_date = models.DateField(null=True, blank=True, verbose_name="Expiration Date")
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Price")
-    status = models.CharField(
-        max_length=20,
-        choices=[('active', 'Active'), ('redeemed', 'Redeemed')],
-        default='active',
-        verbose_name="Status",
-    )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At") 
+STATUS = [
+    ('pending', 'Pending'),
+    ('approved', 'Approved'),
+    ('rejected', 'Rejected'),
+]
+
+class Crypto(models.Model):
+    name = models.CharField(max_length=22)
+    rate = models.DecimalField(max_digits=10, default=0.00, decimal_places=2,)
+    logo = models.ImageField(upload_to='crypto_logos/', null=True, blank=True)   
+
+class CryptoDeposit(models.Model):
+    status = models.CharField(choices=STATUS, max_length=25, default='pending')
+    depositor = models.ForeignKey(User, on_delete=models.CASCADE)
+    crypto = models.CharField(max_length=100)
+    quantity = models.DecimalField(max_digits=15, decimal_places=8, default=0.00, blank=True, null=True)  
+    amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, blank=True, null=True)  
+    naira = models.DecimalField(max_digits=25, decimal_places=2, default=0.00, blank=True, null=True)  
+    created_on = models.DateTimeField(auto_now_add=True)
+    screenshot = models.ImageField(upload_to='deposit_screenshots/', null=True, blank=True)  # New field
 
     def __str__(self):
-        return f"{self.type} - {self.code}"
+        return f"{self.depositor} deposited ({self.quantity} {self.crypto})"
+    
+ 
+class GiftCard(models.Model):
+    name = models.CharField(max_length=100, default="")
+    description = models.CharField(max_length=100, default="", null=True, blank=True)  # e.g., Physical, E-code
+    country = models.CharField(max_length=100, default="", null=True, blank=True)  
+    price_range = models.CharField(max_length=100, default="", null=True, blank=True)  # e.g., $10-$500
+    exchange_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Rate in naira
+    logo = models.ImageField(upload_to='giftcard_logos/', null=True, blank=True)   
+
+    def __str__(self):
+        return f"{self.name} {self.country} - {self.price_range} @ ₦{self.exchange_rate} {self.id}"
+
+class GiftCardDeposit(models.Model): 
+    type = models.CharField(max_length=50, verbose_name="Cart Type") 
+    status = models.CharField(choices=STATUS, max_length=25, default='pending')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    giftcard = models.ForeignKey(GiftCard, on_delete=models.CASCADE)
+    code = models.CharField(max_length=15, default="", null=True, blank=True) 
+    pin = models.CharField(max_length=15, default="", blank=True, null=True) 
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  
+    naira = models.DecimalField(max_digits=25, decimal_places=2, default=0.00, blank=True, null=True)  
+    created_on = models.DateTimeField(auto_now_add=True)  
+  
+    def save(self, *args, **kwargs):
+    # Change from category to giftcard to match the field name
+        if self.giftcard and self.price:
+            self.naira = Decimal(str(self.price)) * self.giftcard.exchange_rate
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+    # Fix indentation and field reference (from category to giftcard)
+        return f"{self.owner}: {self.giftcard.name} - ${self.price}"
+    
+
+class GiftCardImage(models.Model):
+    gift_card = models.ForeignKey(GiftCard, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to='giftcard_images/')
+
+    def __str__(self):
+        return f"Gift card image for {self.gift_card.name}"
 
 class Profile(models.Model):
     GENDER_CHOICES = [
@@ -89,14 +128,4 @@ class Notification(models.Model):
     class Meta:
         ordering = ['created']
     def __str__(self):
-        return str(self.title)
-
-class Crypto(models.Model): 
-    name = models.TextField(max_length=100, unique=True, verbose_name="Content")
-    price = models.PositiveIntegerField(default=1610)
-    created = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['created']
- 
-
+        return str(self.title) 

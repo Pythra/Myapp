@@ -7,8 +7,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView, CreateAPIView
 import requests
-from .models import Profile, Bank, Giftcard, Notification
-from .serializers import ProfileSerializer, BankSerializer, NotificationSerializer,  GiftcardSerializer
+from .models import Profile, Bank, GiftCard, GiftCardDeposit, GiftCardImage, Notification, Crypto, CryptoDeposit
+from .serializers import ProfileSerializer, BankSerializer, GiftCardImageSerializer, NotificationSerializer, CryptoSerializer, CryptoDepositSerializer, GiftCardSerializer, GiftCardDepositSerializer
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse 
@@ -16,53 +16,53 @@ from rest_framework.response import Response
 from django.core.mail import send_mail 
 from django.views.decorators.csrf import csrf_exempt 
 import random
+import string 
 import string
+from django.core.mail import send_mail
 from django.core.cache import cache
+from django.contrib.auth.models import User
+from django.contrib.auth import login, get_user_model
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework import status
+from django.conf import settings
+from rest_framework.viewsets import ModelViewSet
+User = get_user_model()
 
-POSTMARK_API_URL = "https://api.postmarkapp.com/email"
-POSTMARK_API_TOKEN = "c63c358d-8bc7-4c50-a152-e7ead3290119"
-POSTMARK_FROM_EMAIL = "support@useasappay.com"
-
+# ✅ Function to generate a 6-digit verification code
 def generate_verification_code():
     return ''.join(random.choices(string.digits, k=6))
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def initiate_email_verification(request):
+    """Sends a verification email with a code."""
     email = request.data.get('email')
+    
     if not email:
         return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Generate a verification code
+    # ✅ Generate and store verification code in cache
     verification_code = generate_verification_code()
     cache_key = f"email_verification_{email}"
-    cache.set(cache_key, verification_code, timeout=1000)
+    cache.set(cache_key, verification_code, timeout=600)
 
-    # Email payload for Postmark
-    payload = {
-        "From": POSTMARK_FROM_EMAIL,
-        "To": email,
-        "Subject": "Your Email Verification Code",
-        "HtmlBody": f"<p>Your verification code is: <strong>{verification_code}</strong></p>",
-        "MessageStream": "outbound"
-    }
-
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "X-Postmark-Server-Token": POSTMARK_API_TOKEN
-    }
+    subject = "Your Asap Pay Email Verification Code"
+    message = f"Your verification code is: {verification_code}"
+    from_email = settings.DEFAULT_FROM_EMAIL
 
     try:
-        # Send the POST request to Postmark
-        response = requests.post(POSTMARK_API_URL, json=payload, headers=headers)
-
-        if response.status_code == 200:
-            return Response({"message": "Verification code sent successfully"}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": f"Failed to send email: {response.text}"}, status=response.status_code)
+        print("📨 Sending email to:", email) 
+        print(verification_code) # Debugging
+        send_mail(subject, message, from_email, [email])
+        print("✅ Email sent!")  # Debugging
+        return Response({"message": "Verification code sent successfully"}, status=status.HTTP_200_OK)
+    
     except Exception as e:
+        print("❌ Email sending error:", str(e))  # Debugging
         return Response({"error": f"Failed to send email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -91,43 +91,27 @@ def verify_email_code(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def resend_verification_code(request):
-    """Resend verification code to email using Postmark."""
+    """Resends a new verification code via email."""
     email = request.data.get('email')
 
     if not email:
         return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Generate a new verification code
+
+    # ✅ Generate a new verification code
     verification_code = generate_verification_code()
     cache_key = f"email_verification_{email}"
     cache.set(cache_key, verification_code, timeout=600)
 
-    # Email payload for Postmark
-    payload = {
-        "From": POSTMARK_FROM_EMAIL,
-        "To": email,
-        "Subject": "Your New Email Verification Code",
-        "HtmlBody": f"<p>Your new verification code is: <strong>{verification_code}</strong></p>",
-        "MessageStream": "outbound"
-    }
-
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "X-Postmark-Server-Token": POSTMARK_API_TOKEN
-    }
+    subject = "Your New Asap Pay Email Verification Code"
+    message = f"Your new verification code is: {verification_code}"
+    from_email = "Asap Pay Support <Support@useasappay.com>"
 
     try:
-        # Send the POST request to Postmark
-        response = requests.post(POSTMARK_API_URL, json=payload, headers=headers)
-
-        if response.status_code == 200:
-            return Response({"message": "New verification code sent successfully"}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": f"Failed to send email: {response.text}"}, status=response.status_code)
+        send_mail(subject, message, from_email, [email])
+        return Response({"message": "New verification code sent successfully"}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": f"Failed to send email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
+
 
 @permission_classes([AllowAny])
 class SignupView(APIView):
@@ -254,22 +238,30 @@ class BankDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Bank.objects.filter(user=self.request.user)
 
 
-class GiftCardListCreateView(ListCreateAPIView):
-    queryset = Giftcard.objects.all()
-    serializer_class = GiftcardSerializer
+class CryptoViewSet(ModelViewSet):
+    queryset = Crypto.objects.all()
+    serializer_class = CryptoSerializer
 
-# Retrieve, Update, and Delete View
-class GiftCardDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Giftcard.objects.all()
-    serializer_class = GiftcardSerializer
-    lookup_field = 'id'  # Default is 'pk', but specifying for clarity
- 
+class CryptoDepositViewSet(ModelViewSet):
+    queryset = CryptoDeposit.objects.all()
+    serializer_class = CryptoDepositSerializer
 
+class GiftCardViewSet(ModelViewSet):
+    queryset = GiftCard.objects.all()
+    serializer_class = GiftCardSerializer
+
+class GiftCardDepositViewSet(ModelViewSet):
+    queryset = GiftCardDeposit.objects.all()
+    serializer_class = GiftCardDepositSerializer
+class GiftCardImageViewSet(ModelViewSet):
+    queryset = GiftCardImage.objects.all()
+    serializer_class = GiftCardImageSerializer
 
 class NotificationView(generics.ListCreateAPIView):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     permission_classes = [AllowAny] 
+
 
 @api_view(['GET']) 
 def fetch_user(request):
