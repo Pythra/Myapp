@@ -5,7 +5,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-58k)g(oj3c!ry(!v_g5z8tow&4ozd)&s4&*wck^c+c+5@d60wf'
  
 DEBUG = True
-ALLOWED_HOSTS = ['www.useasappay.com', 'useasappay.com', 'www.apprite.pythonanywhere.com', 'apprite.pythonanywhere.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ["myapp-7jrc.onrender.com",  
+    os.environ.get("RENDER_EXTERNAL_HOSTNAME", ""),
+      'www.apprite.pythonanywhere.com', 'apprite.pythonanywhere.com', 
+      'localhost', '127.0.0.1']
  
 CORS_ALLOW_ALL_ORIGINS = True  # Allows requests from any origin during development
  
