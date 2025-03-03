@@ -1,11 +1,12 @@
 from pathlib import Path
- 
+
+import pymysql
 BASE_DIR = Path(__file__).resolve().parent.parent
   
 SECRET_KEY = 'django-insecure-58k)g(oj3c!ry(!v_g5z8tow&4ozd)&s4&*wck^c+c+5@d60wf'
  
 DEBUG = True
-ALLOWED_HOSTS = ['www.apprite.pythonanywhere.com', 'apprite.pythonanywhere.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['www.useasappay.com', 'useasappay.com', 'www.apprite.pythonanywhere.com', 'apprite.pythonanywhere.com', 'localhost', '127.0.0.1']
  
 CORS_ALLOW_ALL_ORIGINS = True  # Allows requests from any origin during development
  
@@ -56,11 +57,17 @@ WSGI_APPLICATION = 'myapp.wsgi.application'
  
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'u890283758_api_db',  # Database name
+        'USER': 'u890283758_Support',  # Database user
+        'PASSWORD': 'Ibra@9000',  # Replace with your actual password
+        'HOST': 'localhost',  # Or use Hostinger’s MySQL host if provided
+        'PORT': '3306',  # Default MySQL port
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
- 
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
