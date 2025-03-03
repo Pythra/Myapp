@@ -1,11 +1,18 @@
 import requests
 
-url = "https://apprite.pythonanywhere.com/api/initiate-email-verification/"
+# API endpoint
+url = "https://myapp-7jrc.onrender.com/api/signup/"
+
+# Test data
 data = {
-    "email": "peze336@gmail.com"  # Test email
+    "username": "testuser",
+    "email": "testuser@example.com",
+    "password": "TestPassword123!"
 }
 
+# Send POST request
 response = requests.post(url, json=data)
 
+# Print response
 print("Status Code:", response.status_code)
-print("Response:", response.json())
+print("Response JSON:", response.json())
