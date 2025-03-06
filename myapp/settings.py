@@ -6,9 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-58k)g(oj3c!ry(!v_g5z8tow&4ozd)&s4&*wck^c+c+5@d60wf'
  
 DEBUG = True
-ALLOWED_HOSTS = ["myapp-7jrc.onrender.com",  
-    os.environ.get("RENDER_EXTERNAL_HOSTNAME", ""),
-      'www.apprite.pythonanywhere.com', 'apprite.pythonanywhere.com', 
+ALLOWED_HOSTS = ["myapp-7jrc.onrender.com",   'www.apprite.pythonanywhere.com', 'apprite.pythonanywhere.com', 
       'localhost', '127.0.0.1']
  
 CORS_ALLOW_ALL_ORIGINS = True  # Allows requests from any origin during development
@@ -111,8 +109,6 @@ EMAIL_USE_SSL=True
 EMAIL_HOST_USER="Support@useasappay.com"
 EMAIL_HOST_PASSWORD="Ibra@9000"
 DEFAULT_FROM_EMAIL="Asap Pay Support <Support@useasappay.com>"
-
-import os
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
