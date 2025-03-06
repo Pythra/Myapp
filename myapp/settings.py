@@ -58,12 +58,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myapp.wsgi.application'
 
+import dj_database_url
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    'default': dj_database_url.config(default="postgresql://asap_admin:585AJFc2NV2i2rMSfvQBkqjkX1FnHl8L@dpg-cv4avg1u0jms73c3ko50-a.oregon-postgres.render.com/asap_rw19")
 }
+
 
 
 AUTH_PASSWORD_VALIDATORS = [
