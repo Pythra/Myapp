@@ -110,6 +110,7 @@ EMAIL_USE_SSL=True
 EMAIL_HOST_USER="Support@useasappay.com"
 EMAIL_HOST_PASSWORD="Ibra@9000"
 DEFAULT_FROM_EMAIL="Asap Pay Support <Support@useasappay.com>"
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 import os
 
