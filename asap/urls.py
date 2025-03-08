@@ -24,6 +24,9 @@ urlpatterns = [
     path('notifications/list/', NotificationView.as_view(), name='notification-list'),
     path('exchange-rate/',  exchange_rate_api, name='exchange_rate_api'),
     path("password_reset/", auth_views.PasswordResetView.as_view(), name="password_reset"), 
+    path('api/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('api/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('api/reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
     path('cryptos/', CryptoViewSet.as_view({'get': 'list', 'post': 'create'}), name='crypto-list-create'),
     path('cryptos/<int:pk>/', CryptoViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='crypto-detail'),
