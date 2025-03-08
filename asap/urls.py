@@ -1,6 +1,6 @@
 from rest_framework.authtoken.views import obtain_auth_token
 from django.urls import path
-from .views import get_coins, fetch_user, delete_user, GiftCardImageViewSet, ChangePasswordView ,verify_email_code, initiate_email_verification, resend_verification_code, NotificationView, ProfileListCreateView, SignupView, LogoutView, ProfileDetailView,  ProfileView, BankCreateView, BankListView, BankDetailView, CryptoViewSet, CryptoDepositViewSet, GiftCardViewSet, GiftCardDepositViewSet
+from .views import get_coins, fetch_user, delete_user, exchange_rate_api, GiftCardImageViewSet, ChangePasswordView ,verify_email_code, initiate_email_verification, resend_verification_code, NotificationView, ProfileListCreateView, SignupView, LogoutView, ProfileDetailView,  ProfileView, BankCreateView, BankListView, BankDetailView, CryptoViewSet, CryptoDepositViewSet, GiftCardViewSet, GiftCardDepositViewSet
 
  
 urlpatterns = [
@@ -21,7 +21,8 @@ urlpatterns = [
     path('verify-email-code/', verify_email_code, name='verify_email_code'),
     path('resend-verification-code/', resend_verification_code, name='resend_verification_code'),
     path('notifications/list/', NotificationView.as_view(), name='notification-list'),
-   
+    path('exchange-rate/',  exchange_rate_api, name='exchange_rate_api'),
+
     path('cryptos/', CryptoViewSet.as_view({'get': 'list', 'post': 'create'}), name='crypto-list-create'),
     path('cryptos/<int:pk>/', CryptoViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='crypto-detail'),
     # Crypto Deposit URLs

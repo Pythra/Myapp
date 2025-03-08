@@ -28,6 +28,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
 from rest_framework.viewsets import ModelViewSet
+
+from django.views.decorators.http import require_http_methods
+
+
 User = get_user_model()
 
 # ✅ Function to generate a 6-digit verification code
@@ -394,3 +398,49 @@ class ChangePasswordView(APIView):
 
         return Response({'message': 'Password changed successfully.'}, status=status.HTTP_200_OK)
 
+def get_usd_to_ngn_rate():
+    url = "https://v6.exchangerate-api.com/v6/ccb35bc50cdaaf2139965393/latest/USD"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        exchange_rate = data["conversion_rates"]["NGN"]
+        return round(exchange_rate, 2)  
+
+    return None  # Return None if the request fails
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def exchange_rate_api(request):
+    """
+    API endpoint to get USD to NGN exchange rate with crypto adjustments
+    """
+    # Get base exchange rate
+    usd_to_ngn = get_usd_to_ngn_rate()
+    
+    if usd_to_ngn is None:
+        return JsonResponse({
+            "success": False,
+            "error": "Failed to fetch exchange rate"
+        }, status=500)
+    
+    # Calculate rates for different cryptocurrencies
+    rates = {
+        "BTC": usd_to_ngn + 30,
+        "USDT": usd_to_ngn + 40,
+        "ETH": usd_to_ngn - 10,
+        "USDC": usd_to_ngn + 40,
+        "BNB": usd_to_ngn - 10,
+        "LTC": usd_to_ngn - 10,
+        "SOL": usd_to_ngn - 10,
+        "DOGE": usd_to_ngn - 10,
+        "DEFAULT": usd_to_ngn
+    }
+    
+    # Return the rates
+    return JsonResponse({
+        "success": True,
+        "base_rate": usd_to_ngn,
+        "rates": rates
+    })
