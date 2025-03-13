@@ -31,8 +31,6 @@ from rest_framework.viewsets import ModelViewSet
 
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate
-from django.shortcuts import redirect
-from django.contrib.auth.views import PasswordChangeDoneView
 
 User = get_user_model()
 
@@ -476,15 +474,3 @@ def login(request):
         return Response({'token': token.key, 'user': {'id': user.id, 'username': user.username, 'email': user.email}})
     else:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-
-class CustomPasswordChangeDoneView(PasswordChangeDoneView):
-    def get(self, request, *args, **kwargs):
-        return redirect('/app-main-screen/')
-
-class NotificationListView(generics.ListAPIView):
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
-
-class NotificationCreateView(generics.CreateAPIView):
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer

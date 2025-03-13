@@ -1,6 +1,6 @@
 from rest_framework.authtoken.views import obtain_auth_token
 from django.urls import path
-from .views import get_coins, fetch_user, delete_user, exchange_rate_api, GiftCardImageViewSet, ChangePasswordView ,verify_email_code, initiate_email_verification, resend_verification_code, NotificationView, ProfileListCreateView, SignupView, LogoutView, ProfileDetailView,  ProfileView, BankCreateView, BankListView, BankDetailView, CryptoViewSet, CryptoDepositViewSet, GiftCardViewSet, GiftCardDepositViewSet, login, NotificationListView, NotificationCreateView
+from .views import get_coins, fetch_user, delete_user, exchange_rate_api, GiftCardImageViewSet, ChangePasswordView ,verify_email_code, initiate_email_verification, resend_verification_code, NotificationView, ProfileListCreateView, SignupView, LogoutView, ProfileDetailView,  ProfileView, BankCreateView, BankListView, BankDetailView, CryptoViewSet, CryptoDepositViewSet, GiftCardViewSet, GiftCardDepositViewSet, login
 
 from django.contrib.auth import views as auth_views
  
@@ -21,8 +21,7 @@ urlpatterns = [
     path('initiate-email-verification/', initiate_email_verification, name='initiate_email_verification'),
     path('verify-email-code/', verify_email_code, name='verify_email_code'),
     path('resend-verification-code/', resend_verification_code, name='resend_verification_code'),
-    path('notifications/list/', NotificationListView.as_view(), name='notification_list'),
-    path('notifications/create/', NotificationCreateView.as_view(), name='notification_create'),
+    path('notifications/list/', NotificationView.as_view(), name='notification-list'),
     path('exchange-rate/',  exchange_rate_api, name='exchange_rate_api'),
     path("password_reset/", auth_views.PasswordResetView.as_view(), name="password_reset"), 
     path('api/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
