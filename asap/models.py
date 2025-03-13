@@ -2,6 +2,7 @@ from django.contrib.auth.models import User  # Use the default User model
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import models
 from decimal import Decimal 
+from .signals import send_notification
 
 
 STATUS = [
@@ -128,4 +129,4 @@ class Notification(models.Model):
     class Meta:
         ordering = ['created']
     def __str__(self):
-        return str(self.title) 
+        return str(self.title)
