@@ -47,6 +47,10 @@ def initiate_email_verification(request):
     if not email:
         return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Check if the email already exists
+    if User.objects.filter(email=email).exists():
+        return Response({"email_exists": True, "error": "A user with this email already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
     # ✅ Generate and store verification code in cache
     verification_code = generate_verification_code()
     cache_key = f"email_verification_{email}"
@@ -451,6 +455,7 @@ def exchange_rate_api(request):
     })
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
     identifier = request.data.get('identifier')
     password = request.data.get('password')
