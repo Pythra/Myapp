@@ -1,6 +1,6 @@
 from rest_framework.authtoken.views import obtain_auth_token
 from django.urls import path
-from .views import get_coins, fetch_user, delete_user, exchange_rate_api, GiftCardImageViewSet, ChangePasswordView ,verify_email_code, initiate_email_verification, resend_verification_code, NotificationView, ProfileListCreateView, SignupView, LogoutView, ProfileDetailView,  ProfileView, BankCreateView, BankListView, BankDetailView, CryptoViewSet, CryptoDepositViewSet, GiftCardViewSet, GiftCardDepositViewSet, login
+from .views import get_coins, fetch_user, delete_user, exchange_rate_api, GiftCardImageViewSet, ChangePasswordView ,verify_email_code, initiate_email_verification, resend_verification_code, NotificationView, ProfileListCreateView, SignupView, LogoutView, ProfileDetailView,  ProfileView, BankCreateView, BankListView, BankDetailView, CryptoViewSet, CryptoDepositViewSet, GiftCardViewSet, GiftCardDepositViewSet, login, PasswordResetRequestView, PasswordResetConfirmView
 
 from django.contrib.auth import views as auth_views
  
@@ -42,4 +42,8 @@ urlpatterns = [
     # Gift Card Deposit URLs
     path('giftcard-deposits/', GiftCardDepositViewSet.as_view({'get': 'list', 'post': 'create'}), name='giftcard-deposit-list-create'),
     path('giftcard-deposits/<int:pk>/', GiftCardDepositViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='giftcard-deposit-detail'),
+
+    # Password Reset URLs
+    path('api/password-reset/', PasswordResetRequestView.as_view(), name='password_reset_request'),
+    path('api/password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 ]

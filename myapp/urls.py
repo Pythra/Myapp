@@ -8,7 +8,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('asap.urls')),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
