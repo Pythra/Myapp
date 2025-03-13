@@ -1,12 +1,12 @@
 from rest_framework.authtoken.views import obtain_auth_token
 from django.urls import path
-from .views import get_coins, fetch_user, delete_user, exchange_rate_api, GiftCardImageViewSet, ChangePasswordView ,verify_email_code, initiate_email_verification, resend_verification_code, NotificationView, ProfileListCreateView, SignupView, LogoutView, ProfileDetailView,  ProfileView, BankCreateView, BankListView, BankDetailView, CryptoViewSet, CryptoDepositViewSet, GiftCardViewSet, GiftCardDepositViewSet
+from .views import get_coins, fetch_user, delete_user, exchange_rate_api, GiftCardImageViewSet, ChangePasswordView ,verify_email_code, initiate_email_verification, resend_verification_code, NotificationView, ProfileListCreateView, SignupView, LogoutView, ProfileDetailView,  ProfileView, BankCreateView, BankListView, BankDetailView, CryptoViewSet, CryptoDepositViewSet, GiftCardViewSet, GiftCardDepositViewSet, login
 
 from django.contrib.auth import views as auth_views
  
 urlpatterns = [
     path('signup/', SignupView.as_view(), name='signup'),
-    path('login/', obtain_auth_token, name='login'),
+    path('login/', login, name='login'),
     path('user/', fetch_user, name='fetch-user'),
     path('delete/user/', delete_user, name='delete-user'),
     path('logout/', LogoutView.as_view(), name='logout'), 

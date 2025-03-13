@@ -30,7 +30,7 @@ from django.conf import settings
 from rest_framework.viewsets import ModelViewSet
 
 from django.views.decorators.http import require_http_methods
-
+from django.contrib.auth import authenticate
 
 User = get_user_model()
 
@@ -136,6 +136,12 @@ class SignupView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {"error": "A user with this email already exists."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # Password validation
         if not self.validate_password(password, username):
             return Response(
@@ -143,7 +149,6 @@ class SignupView(APIView):
                 status=status.HTTP_400_BAD_REQUEST, 
             )
 
-      
         # Create the user
         user = User.objects.create_user(username=username, email=email, password=password)
 
@@ -444,3 +449,23 @@ def exchange_rate_api(request):
         "base_rate": usd_to_ngn,
         "rates": rates
     })
+
+@api_view(['POST'])
+def login(request):
+    identifier = request.data.get('identifier')
+    password = request.data.get('password')
+    user = authenticate(username=identifier, password=password)
+
+    if user is None:
+        try:
+            user = User.objects.get(email=identifier)
+            if not user.check_password(password):
+                user = None
+        except User.DoesNotExist:
+            user = None
+
+    if user is not None:
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key, 'user': {'id': user.id, 'username': user.username, 'email': user.email}})
+    else:
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
